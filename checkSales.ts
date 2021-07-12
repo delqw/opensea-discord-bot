@@ -10,6 +10,8 @@ const requestListener = function (req, res) {
     res.end('Hello, World!');
 }
 
+const pushed = [];
+
 const discordBot = new Discord.Client();
 const  discordSetup = async (): Promise<TextChannel> => {
   return new Promise<TextChannel>((resolve, reject) => {
@@ -53,7 +55,7 @@ async function main() {
 
 async function check(channel, seconds) {
     try {
-        const hoursAgo = (Math.round(new Date().getTime() / 1000) - (seconds)); // in the last hour, run hourly?
+        const hoursAgo = (Math.round(new Date().getTime() / 1000) - (seconds * 10)); // in the last hour, run hourly?
         const openSeaResponse = await fetch(
             "https://api.opensea.io/api/v1/events?" + new URLSearchParams({
                 offset: '0',
@@ -73,8 +75,9 @@ async function check(channel, seconds) {
 
         await Promise.all(
             openSeaResponse?.asset_events?.reverse().map(async (sale: any) => {
-                console.log('New sale!')
+                if (pushed.indexOf(sale.id) !== -1) return;
                 const message = buildMessage(sale);
+                pushed.push(sale.id);
                 return channel.send(message)
             })
         );
