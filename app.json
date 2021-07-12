@@ -6,7 +6,7 @@
     "nft",
     "discord"
   ],
-  "repository": "https://github.com/sbauch/opensea-discord-bot",
+  "repository": "https://github.com/delqw/opensea-discord-bot",
   "env": {
     "CONTRACT_ADDRESS": {
       "description": "The address of your token contract"
@@ -25,10 +25,14 @@
     "SECONDS": {
       "description": "How many seconds should we look back for sales on OpenSea. i.e. 3600 for one hour. Running more frequently may get you banned from the OpenSea API",
       "required": false
+    },
+    "OPENSEA_KEY": {
+      "description": "OpenSea API token",
+      "required": true
     }
   },
   "image": "heroku/nodejs",
-  "addons": ["scheduler"],
+  "addons": [],
   "formation": [],
   "buildpacks": [
     {

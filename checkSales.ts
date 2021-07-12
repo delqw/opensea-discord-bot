@@ -41,33 +41,39 @@ const buildMessage = (sale: any) => (
 async function main() {
   const channel = await discordSetup();
   const seconds = process.env.SECONDS ? parseInt(process.env.SECONDS) : 3_600;
-  const hoursAgo = (Math.round(new Date().getTime() / 1000) - (seconds)); // in the last hour, run hourly?
-  
-  const openSeaResponse = await fetch(
-    "https://api.opensea.io/api/v1/events?" + new URLSearchParams({
-      offset: '0',
-      limit: '100',
-      event_type: 'successful',
-      only_opensea: 'false',
-      occurred_after: hoursAgo.toString(), 
-      collection_slug: process.env.COLLECTION_SLUG!,
-      contract_address: process.env.CONTRACT_ADDRESS!
-  })).then((resp) => resp.json());
-
-  await Promise.all(
-    openSeaResponse?.asset_events?.reverse().map(async (sale: any) => {
-      const message = buildMessage(sale);
-      return channel.send(message)
-    })
-  );   
+  setInterval(() => check(channel, seconds), seconds * 1000)
 }
 
-main()
-  .then((res) =>{ 
-    console.warn(res)
-    process.exit(0)
-  })
-  .catch(error => {
-    console.error(error);
-    process.exit(1);
-  });
+async function check(channel, seconds) {
+    try {
+        const hoursAgo = (Math.round(new Date().getTime() / 1000) - (seconds)); // in the last hour, run hourly?
+        const openSeaResponse = await fetch(
+            "https://api.opensea.io/api/v1/events?" + new URLSearchParams({
+                offset: '0',
+                limit: '100',
+                event_type: 'successful',
+                only_opensea: 'false',
+                occurred_after: hoursAgo.toString(),
+                collection_slug: process.env.COLLECTION_SLUG!,
+                contract_address: process.env.CONTRACT_ADDRESS!
+            }), {
+                headers: {
+                    "X-API-KEY": process.env.OPENSEA_KEY
+                },
+            }).then((resp) => resp.json());
+
+        console.log('Data', openSeaResponse);
+
+        await Promise.all(
+            openSeaResponse?.asset_events?.reverse().map(async (sale: any) => {
+                console.log('New sale!')
+                const message = buildMessage(sale);
+                return channel.send(message)
+            })
+        );
+    } catch (e) {
+        console.error('Check Error', e);
+    }
+}
+
+main();
