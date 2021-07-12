@@ -2,8 +2,13 @@ import 'dotenv/config';
 import Discord, { TextChannel } from 'discord.js';
 import fetch from 'node-fetch';
 import { ethers } from "ethers";
+const http = require('http');
 import { parseISO } from 'date-fns'
 
+const requestListener = function (req, res) {
+    res.writeHead(200);
+    res.end('Hello, World!');
+}
 
 const discordBot = new Discord.Client();
 const  discordSetup = async (): Promise<TextChannel> => {
@@ -39,6 +44,8 @@ const buildMessage = (sale: any) => (
 )
 
 async function main() {
+  const server = http.createServer(requestListener);
+  server.listen(process.env.PORT || 8080);
   const channel = await discordSetup();
   const seconds = process.env.SECONDS ? parseInt(process.env.SECONDS) : 3_600;
   setInterval(() => check(channel, seconds), seconds * 1000)
