@@ -33,7 +33,11 @@
   },
   "image": "heroku/nodejs",
   "addons": [],
-  "formation": [],
+  "formation": [{
+    "worker": {
+      "quantity": 1
+    }
+  }],
   "buildpacks": [
     {
       "url": "heroku/nodejs"
